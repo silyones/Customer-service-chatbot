@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Customer Service Chatbot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #FF9900; /* Amazon orange */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    h2 {
+      color: #fff;
+      margin-top: 30px;
+      font-size: 32px;
+    }
+
+    .chat-box {
+      background-color: #E6F0FF; /* Light blue box */
+      width: 90%;
+      max-width: 500px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ccc; /* Placeholder */
+      margin-right: 10px;
+    }
+
+    .profile span {
+      font-weight: bold;
+      font-size: 18px;
+      color: #232F3E;
+    }
+
+    #chatOutput {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #232F3E;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #111;
+    }
+  </style>
+</head>
+<body>
+  <h2>Customer Service</h2>
+
+  <div class="chat-box">
+    <div class="profile">
+      <img src="images/Anna.jpg" alt="Smiling woman named Anna wearing a headset, sitting at a desk in a bright customer service office, friendly and approachable expression" />
+      <span>Anna</span>
+    </div>
+
+    <div id="chatOutput"></div>
+
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="startMic()">🎤</button>
+    </div>
+  </div>
+
+  <script>
+    function startMic() {
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.start();
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("userInput").value = transcript;
+        sendMessage();
+      };
+    }
+
+    function sendMessage() {
+      const message = document.getElementById("userInput").value;
+      if (!message.trim()) return;
+
+      fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const output = document.getElementById("chatOutput");
+        output.innerHTML += `<p><b>You:</b> ${message}</p>`;
+        output.innerHTML += `<p><b>Bot:</b> ${data.answer}</p>`;
+        output.scrollTop = output.scrollHeight; // Auto-scroll
+        document.getElementById("userInput").value = "";
+      });
+    }
+  </script>
+</body>
+</html>
